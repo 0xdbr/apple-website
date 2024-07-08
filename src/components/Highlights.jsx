@@ -1,39 +1,68 @@
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { rightImg, watchImg } from "../utils";
-import VideoCarousel from './VideoCarousel';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { heroVideo, smallHeroVideo } from '../utils';
+import { useEffect, useState } from 'react';
 
-const Highlights = () => {
-  // Use the useGSAP hook to animate the title and links when the component mounts
+const Hero = () => {
+  // State to hold the video source based on window width
+  const [videoSrc, setVideoSrc] = useState(
+    window.innerWidth < 760 ? smallHeroVideo : heroVideo
+  );
+
+  // Function to handle setting the video source based on window width
+  const handleVideoSrcSet = () => {
+    if (window.innerWidth < 760) {
+      setVideoSrc(smallHeroVideo);
+    } else {
+      setVideoSrc(heroVideo);
+    }
+  };
+
+  // useEffect hook to add/remove event listener for window resize
+  useEffect(() => {
+    window.addEventListener('resize', handleVideoSrcSet);
+
+    return () => {
+      window.removeEventListener('resize', handleVideoSrcSet);
+    };
+  }, []);
+
+  // useGSAP hook to animate the hero section elements
   useGSAP(() => {
-    gsap.to('#title', { opacity: 1, y: 0 });
-    gsap.to('.link', { opacity: 1, y: 0, duration: 1, stagger: 0.25 });
+    gsap.to('#hero', { opacity: 1, delay: 2 });
+    gsap.to('#cta', { opacity: 1, y: -50, delay: 2 });
   }, []);
 
   return (
-    <section id="highlights" className="w-screen overflow-hidden h-full common-padding bg-zinc">
-      <div className="screen-max-width">
-        <div className="mb-12 w-full md:flex items-end justify-between">
-          {/* Render the section heading */}
-          <h1 id="title" className="section-heading">Get the highlights.</h1>
-          <div className="flex flex-wrap items-end gap-5">
-            {/* Render the "Watch the film" link */}
-            <p key="watch" className="link">
-              Watch the film
-              <img src={watchImg} alt="watch" className="ml-2" />
-            </p>
-            {/* Render the "Watch the event" link */}
-            <p key="event" className="link">
-              Watch the event
-              <img src={rightImg} alt="right" className="ml-2" />
-            </p>
-          </div>
+    <section className="w-full nav-height bg-black relative">
+      <div className="h-5/6 w-full flex-center flex-col">
+        {/* Hero title */}
+        <p id="hero" className="hero-title">
+          iPhone 15 Pro
+        </p>
+        <div className="md:w-10/12 w-9/12">
+          {/* Video player */}
+          <video
+            className="pointer-events-none"
+            autoPlay
+            muted
+            playsInline={true}
+            key={videoSrc}
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
         </div>
-        {/* Render the VideoCarousel component */}
-        <VideoCarousel />
+      </div>
+
+      {/* Call-to-action section */}
+      <div id="cta" className="flex flex-col items-center opacity-0 translate-y-20">
+        <a href="#highlights" className="btn">
+          Buy
+        </a>
+        <p className="font-normal text-xl">From $199/month or $999</p>
       </div>
     </section>
   );
 };
 
-export default Highlights;
+export default Hero;
